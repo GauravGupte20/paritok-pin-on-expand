@@ -1,0 +1,1141 @@
+<title>Pin-on-Expand — a reconciliation</title>
+
+<style>
+  :root {
+    color-scheme: light;
+    --surface:      #f4f6f8;
+    --raised:       #ffffff;
+    --sunken:       #eaedf1;
+    --ink:          #14171c;
+    --ink-2:        #4a525e;
+    --ink-3:        #79828f;
+    --rule:         #dde2e8;
+    --rule-strong:  #c3cad3;
+    --reported:     #2a78d6;
+    --billed:       #eb6834;
+    --neutral-mark: #8d95a1;
+    --shadow: 0 1px 2px rgba(20, 23, 28, .06), 0 8px 24px -12px rgba(20, 23, 28, .18);
+
+    --display: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface:      #101317;
+      --raised:       #171b21;
+      --sunken:       #0b0d10;
+      --ink:          #eef1f5;
+      --ink-2:        #a9b2bf;
+      --ink-3:        #6f7885;
+      --rule:         #262c35;
+      --rule-strong:  #39414c;
+      --reported:     #3987e5;
+      --billed:       #d95926;
+      --neutral-mark: #6f7885;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface:      #101317;
+    --raised:       #171b21;
+    --sunken:       #0b0d10;
+    --ink:          #eef1f5;
+    --ink-2:        #a9b2bf;
+    --ink-3:        #6f7885;
+    --rule:         #262c35;
+    --rule-strong:  #39414c;
+    --reported:     #3987e5;
+    --billed:       #d95926;
+    --neutral-mark: #6f7885;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --surface:      #f4f6f8;
+    --raised:       #ffffff;
+    --sunken:       #eaedf1;
+    --ink:          #14171c;
+    --ink-2:        #4a525e;
+    --ink-3:        #79828f;
+    --rule:         #dde2e8;
+    --rule-strong:  #c3cad3;
+    --reported:     #2a78d6;
+    --billed:       #eb6834;
+    --neutral-mark: #8d95a1;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+
+  /* ── masthead ─────────────────────────────────────── */
+
+  .masthead {
+    padding: 56px 0 32px;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .docket {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(2.1rem, 5.2vw, 3.3rem);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    font-size: 1.075rem;
+    color: var(--ink-2);
+    max-width: 63ch;
+    margin: 0;
+  }
+
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  /* ── reconciliation ───────────────────────────────── */
+
+  .recon {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .recon-side { padding: 36px 4px 34px; display: flex; flex-direction: column; gap: 6px; }
+  .recon-side.right { text-align: right; align-items: flex-end; }
+
+  .recon-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .swatch {
+    width: 9px; height: 9px; border-radius: 2px;
+    background: var(--c); flex: none;
+  }
+
+  .recon-figure {
+    font-family: var(--mono);
+    font-size: clamp(2.6rem, 8vw, 4.1rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--c);
+  }
+
+  .recon-sub { font-size: .875rem; color: var(--ink-2); max-width: 30ch; }
+  .recon-side.right .recon-sub { text-align: right; }
+
+  .recon-rule {
+    width: 1px;
+    background: var(--rule-strong);
+    margin: 24px 28px;
+    position: relative;
+  }
+
+  .recon-rule::after {
+    content: "vs";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--surface);
+    padding: 6px 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    color: var(--ink-3);
+  }
+
+  .recon-note {
+    grid-column: 1 / -1;
+    padding: 0 0 26px;
+    font-size: .9rem;
+    color: var(--ink-2);
+    max-width: 70ch;
+  }
+
+  /* ── sections ─────────────────────────────────────── */
+
+  section { padding-top: 56px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 10px;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1.45rem, 3vw, 1.85rem);
+    letter-spacing: -0.012em;
+    line-height: 1.2;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--body);
+    font-size: .95rem;
+    font-weight: 650;
+    margin: 0 0 12px;
+    letter-spacing: -0.005em;
+  }
+
+  p { margin: 0 0 16px; max-width: 68ch; color: var(--ink-2); }
+  p strong { color: var(--ink); font-weight: 600; }
+  p:last-child { margin-bottom: 0; }
+
+  code {
+    font-family: var(--mono);
+    font-size: .855em;
+    background: var(--sunken);
+    padding: .1em .38em;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  a { color: var(--reported); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--reported);
+    outline-offset: 2px;
+  }
+
+  /* ── ledger (the POST breakdown) ──────────────────── */
+
+  .ledger {
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 88px 1fr 130px;
+    gap: 16px;
+    align-items: baseline;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .ledger-row:last-child { border-bottom: none; }
+
+  .ledger-row.head {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    background: var(--sunken);
+    padding-top: 10px; padding-bottom: 10px;
+  }
+
+  .ledger-row.total {
+    background: var(--sunken);
+    border-top: 2px solid var(--ink);
+    font-weight: 650;
+  }
+
+  .lr-id { font-family: var(--mono); font-size: .8rem; color: var(--ink-3); }
+  .lr-what { font-size: .92rem; color: var(--ink-2); }
+  .lr-what b { color: var(--ink); font-weight: 600; }
+  .lr-n {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    font-size: .95rem;
+    color: var(--ink);
+  }
+  .lr-n.em { color: var(--billed); font-weight: 600; }
+
+  .flag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid var(--billed);
+    color: var(--billed);
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+
+  /* ── figures / charts ─────────────────────────────── */
+
+  figure {
+    margin: 0;
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    padding: 22px 22px 18px;
+  }
+
+  figcaption {
+    font-size: .82rem;
+    color: var(--ink-3);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    max-width: none;
+  }
+
+  .fig-title {
+    font-size: .95rem;
+    font-weight: 650;
+    margin: 0 0 2px;
+    color: var(--ink);
+  }
+
+  .fig-sub { font-size: .84rem; color: var(--ink-3); margin: 0 0 18px; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0 0 16px;
+    font-size: .8rem;
+    color: var(--ink-2);
+    font-family: var(--mono);
+  }
+
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  .chart-scroll { overflow-x: auto; }
+  svg { display: block; max-width: 100%; height: auto; }
+
+  .bar-track { fill: var(--sunken); }
+  .grid-line { stroke: var(--rule); stroke-width: 1; }
+  .axis-text {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    fill: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .bar-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    fill: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .group-label {
+    font-family: var(--body);
+    font-size: 12px;
+    fill: var(--ink-2);
+  }
+  .baseline-line { stroke: var(--neutral-mark); stroke-width: 2; stroke-dasharray: 5 4; }
+
+  .bar { transition: opacity .12s ease; cursor: default; }
+  .bar:hover { opacity: .78; }
+
+  /* ── projection controls ──────────────────────────── */
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    padding: 0 0 20px;
+    margin: 0 0 4px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .ctl { display: flex; flex-direction: column; gap: 7px; min-width: 200px; flex: 1; }
+
+  .ctl label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .ctl-val { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  input[type="range"] { width: 100%; accent-color: var(--reported); }
+
+  .seg { display: flex; gap: 0; border: 1px solid var(--rule-strong); border-radius: 5px; overflow: hidden; }
+
+  .seg button {
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 4px;
+    background: var(--raised);
+    color: var(--ink-2);
+    border: none;
+    border-right: 1px solid var(--rule-strong);
+    cursor: pointer;
+  }
+
+  .seg button:last-child { border-right: none; }
+  .seg button[aria-pressed="true"] { background: var(--reported); color: #fff; }
+
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+
+  .readout div { background: var(--raised); padding: 14px 16px; }
+
+  .readout dt {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 5px;
+  }
+
+  .readout dd {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 1.32rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  /* ── data table ───────────────────────────────────── */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .875rem;
+  }
+
+  caption {
+    text-align: left;
+    font-size: .82rem;
+    color: var(--ink-3);
+    padding-bottom: 10px;
+  }
+
+  th, td {
+    text-align: right;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--rule);
+    font-variant-numeric: tabular-nums;
+  }
+
+  th:first-child, td:first-child { text-align: left; }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+
+  tbody td { font-family: var(--mono); color: var(--ink); }
+  tbody td:first-child { font-family: var(--body); color: var(--ink-2); }
+  tbody tr.spacer td { border-bottom: none; padding: 4px; }
+  .scenario-head td {
+    font-family: var(--body);
+    font-weight: 650;
+    color: var(--ink);
+    font-size: .84rem;
+    padding-top: 16px;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+
+  .pos { color: var(--reported); }
+  .neg { color: var(--billed); }
+
+  /* ── caveats ──────────────────────────────────────── */
+
+  .caveats {
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--billed);
+    border-radius: 4px;
+    padding: 22px 24px;
+  }
+
+  .caveats ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 11px; }
+  .caveats li { color: var(--ink-2); font-size: .93rem; }
+  .caveats li strong { color: var(--ink); font-weight: 600; }
+
+  .repro {
+    font-family: var(--mono);
+    font-size: .8rem;
+    background: var(--sunken);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    color: var(--ink-2);
+    line-height: 1.75;
+  }
+
+  .repro b { color: var(--ink); font-weight: 600; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 2px solid var(--ink);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    justify-content: space-between;
+  }
+
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--ink);
+    color: var(--surface);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 7px 10px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .1s ease;
+    z-index: 50;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  @media (max-width: 640px) {
+    .recon { grid-template-columns: 1fr; }
+    .recon-rule { width: auto; height: 1px; margin: 0; }
+    .recon-rule::after { padding: 0 10px; }
+    .recon-side.right { text-align: left; align-items: flex-start; }
+    .recon-side.right .recon-sub { text-align: left; }
+    .ledger-row { grid-template-columns: 60px 1fr; }
+    .ledger-row .lr-n { grid-column: 2; text-align: left; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="docket">
+      <span>Paritok token-efficiency hackathon</span>
+      <span>Measured 30 Jul 2026</span>
+      <span>Apache-2.0</span>
+    </div>
+    <h1>A gateway that reports saving you 73% while billing you 51% more</h1>
+    <p class="standfirst">
+      Paritok compresses AI agent context and reports the savings. On a single measured turn
+      through a real proxy, the reported figure and the actual bill move in
+      <strong>opposite directions</strong>. This page shows the measurement, the mechanism,
+      and a fix — <strong>pin-on-expand</strong> — that recovers most of the loss.
+    </p>
+  </header>
+
+  <div class="recon">
+    <div class="recon-side" style="--c: var(--reported)">
+      <div class="recon-label"><i class="swatch" style="--c: var(--reported)"></i> Paritok reports</div>
+      <div class="recon-figure">73.1%</div>
+      <div class="recon-sub">saved, from the proxy&rsquo;s own <code>/stats</code> endpoint</div>
+    </div>
+    <div class="recon-rule"></div>
+    <div class="recon-side right" style="--c: var(--billed)">
+      <div class="recon-label"><i class="swatch" style="--c: var(--billed)"></i> The provider bills</div>
+      <div class="recon-figure">&minus;50.9%</div>
+      <div class="recon-sub">i.e. more than sending the file with no compression at all</div>
+    </div>
+    <p class="recon-note">
+      One client turn. One 20,005-token file (<code>argparse.py</code>) in context. The same turn,
+      counted two ways.
+    </p>
+  </div>
+
+  <section>
+    <p class="eyebrow">The mechanism</p>
+    <h2>The gateway bills for traffic it doesn&rsquo;t count</h2>
+    <p>
+      When the model calls <code>expand_context</code>, the proxy resolves it inside its own loop,
+      appends the full original to a proxy-local thread, and POSTs that thread upstream
+      <em>again</em>. But <code>stats</code> is computed once in <code>process_request</code> —
+      <strong>before</strong> that loop runs. The second POST is billed by the provider and never
+      reaches the accounting.
+    </p>
+
+    <div class="ledger">
+      <div class="ledger-row head">
+        <div>Request</div><div>What went upstream</div><div>Input tokens</div>
+      </div>
+      <div class="ledger-row">
+        <div class="lr-id">POST 0</div>
+        <div class="lr-what">Compressed request — <b>counted</b> by <code>/stats</code></div>
+        <div class="lr-n">5,113</div>
+      </div>
+      <div class="ledger-row">
+        <div class="lr-id">POST 1</div>
+        <div class="lr-what">
+          Carries the full expanded original
+          <span class="flag">not counted</span>
+        </div>
+        <div class="lr-n em">25,118</div>
+      </div>
+      <div class="ledger-row total">
+        <div class="lr-id">Billed</div>
+        <div class="lr-what">What the provider actually charged for</div>
+        <div class="lr-n em">30,231</div>
+      </div>
+      <div class="ledger-row">
+        <div class="lr-id">Reported</div>
+        <div class="lr-what"><code>input_tokens_compressed</code>, and the basis for <code>$0.05 saved</code></div>
+        <div class="lr-n">5,398</div>
+      </div>
+    </div>
+
+    <p style="margin-top:18px">
+      There is a second effect. <code>_conceal_virtual_calls</code> strips the exchange from the
+      reply, so the client agent never sees it. Next turn the agent re-sends the original, Paritok
+      re-compresses it to the same reference, and the model expands it again —
+      <strong>every turn, forever</strong>.
+    </p>
+    <p>
+      Paritok&rsquo;s README does state that <code>/stats</code> is &ldquo;scoped to what Paritok
+      actually intervenes in.&rdquo; So this is not a hidden number. The problem is narrower and
+      worse: the excluded traffic is <em>generated by the gateway itself</em>.
+    </p>
+  </section>
+
+  <section>
+    <p class="eyebrow">The fix</p>
+    <h2>Treat an expansion as an admission</h2>
+    <p>
+      When the model calls <code>expand_context</code>, it is stating that compressing that content
+      was wrong. That is a free supervision signal, and nothing currently uses it. <strong>Pin the
+      content and pass it through verbatim from then on</strong> — the reference never reappears,
+      so there is nothing left to expand, and the turn costs one POST instead of two.
+    </p>
+    <p>
+      Pins are keyed by content hash and by source path, so a re-read at a different offset still
+      hits. Content nobody expands is compressed exactly as before.
+    </p>
+
+    <figure style="margin-top:26px">
+      <p class="fig-title">Tokens billed across a 3-turn session</p>
+      <p class="fig-sub">Lower is better. Dashed line = what no proxy at all would cost (60,015).</p>
+      <div class="legend">
+        <span><i class="swatch" style="--c: var(--billed)"></i> Actually billed</span>
+        <span><i class="swatch" style="--c: var(--neutral-mark); width:14px; height:2px; border-radius:0"></i> No proxy baseline</span>
+      </div>
+      <div class="chart-scroll"><svg id="ab-chart" viewBox="0 0 860 340" role="img"
+        aria-label="Bar chart of tokens billed across a 3-turn session, comparing stock Paritok and pin-on-expand in two scenarios."></svg></div>
+      <figcaption>
+        Scenario A is the control: the model never calls <code>expand_context</code>, and the two
+        variants are identical — pinning costs nothing when it never fires. Scenario B is the
+        stress case: the model needs exact source every turn.
+      </figcaption>
+    </figure>
+
+    <div style="margin-top:26px; overflow-x:auto">
+      <table>
+        <caption>The same measurements as a table. &ldquo;Reported&rdquo; is each proxy&rsquo;s own <code>/stats</code> figure.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Variant</th>
+            <th scope="col">Upstream POSTs</th>
+            <th scope="col">Billed</th>
+            <th scope="col">Reported</th>
+            <th scope="col">vs no proxy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="scenario-head"><td colspan="5">Scenario A — model never expands (control)</td></tr>
+          <tr><td>Stock Paritok</td><td>3</td><td>15,366</td><td>16,200</td><td class="pos">+74.4%</td></tr>
+          <tr><td>Pin-on-expand</td><td>3</td><td>15,366</td><td>16,200</td><td class="pos">+74.4%</td></tr>
+          <tr class="scenario-head"><td colspan="5">Scenario B — model expands the file each turn</td></tr>
+          <tr><td>Stock Paritok</td><td>6</td><td>90,747</td><td>16,200</td><td class="neg">&minus;51.2%</td></tr>
+          <tr><td>Pin-on-expand</td><td>4</td><td>70,281</td><td>45,472</td><td class="neg">&minus;17.1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:22px">
+      In the stress case, pinning cuts <strong>22.6% of billed tokens</strong> and removes two
+      upstream round-trips. It also drags <code>/stats</code> closer to honest — 45,472 reported
+      against 70,281 billed, versus 16,200 against 90,747 — because pinned passthrough is counted
+      at full size rather than silently excluded.
+    </p>
+    <p>
+      <strong>It does not make Scenario B profitable, and this page will not claim it does.</strong>
+      The pin is <em>learned</em> from the first expansion, so the first turn is always paid in
+      full. A session where the model needs exact source every single turn is one where compression
+      cannot win; the honest goal there is to stop losing badly.
+    </p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Projection</p>
+    <h2>Where the crossover sits</h2>
+    <p>
+      Longer sessions change the arithmetic — pinning is a fixed one-turn cost that pays back over
+      every turn after it. Below, per-turn costs are held at their measured values and only the
+      session shape varies.
+    </p>
+
+    <figure style="margin-top:24px">
+      <div class="controls">
+        <div class="ctl">
+          <label for="turns">Turns in session · <span class="ctl-val" id="turns-val">3</span></label>
+          <input type="range" id="turns" min="1" max="24" value="3" step="1">
+        </div>
+        <div class="ctl">
+          <label for="freq-group">Model needs exact source</label>
+          <div class="seg" id="freq-group" role="group" aria-label="How often the model needs exact source">
+            <button type="button" data-freq="1" aria-pressed="true">Every turn</button>
+            <button type="button" data-freq="3" aria-pressed="false">Every 3rd</button>
+            <button type="button" data-freq="6" aria-pressed="false">Every 6th</button>
+            <button type="button" data-freq="0" aria-pressed="false">Never</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend" style="margin-top:16px">
+        <span><i class="swatch" style="--c: var(--billed)"></i> Stock Paritok</span>
+        <span><i class="swatch" style="--c: var(--reported)"></i> Pin-on-expand</span>
+        <span><i class="swatch" style="--c: var(--neutral-mark); width:14px; height:2px; border-radius:0"></i> No proxy</span>
+      </div>
+
+      <div class="chart-scroll"><svg id="proj-chart" viewBox="0 0 860 300" role="img"
+        aria-label="Line chart projecting cumulative billed tokens over a session for stock Paritok, pin-on-expand, and no proxy."></svg></div>
+
+      <dl class="readout">
+        <div><dt>Stock Paritok</dt><dd class="neg" id="ro-stock">—</dd></div>
+        <div><dt>Pin-on-expand</dt><dd class="pos" id="ro-pin">—</dd></div>
+        <div><dt>Saved by pinning</dt><dd id="ro-delta">—</dd></div>
+      </dl>
+
+      <figcaption>
+        <strong>This is a projection, not a measurement.</strong> It replays four measured per-turn
+        costs — 5,122 compressed · 30,249 expand round-trip · 20,016 pinned passthrough · 20,005
+        uncompressed — across session shapes that were not themselves run. Only the 3-turn points
+        are measured.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <p class="eyebrow">Limitations</p>
+    <h2>What would change these numbers</h2>
+    <div class="caveats">
+      <ul>
+        <li>
+          <strong>The compressor is mocked</strong>, not the 4B model. The rig&rsquo;s measured
+          compression ratio is 0.269 against Paritok&rsquo;s published 0.257, so magnitudes are
+          representative — but the real model&rsquo;s output differs.
+        </li>
+        <li>
+          <strong>The provider is mocked</strong> and the decision to expand is scripted. Real-world
+          expansion rates are unmeasured. Scenario B is a deliberate stress case, not a claim about
+          typical usage; Scenario A is the other extreme.
+        </li>
+        <li>
+          <strong>Prompt caching is not modelled.</strong> The second POST&rsquo;s prefix overlaps
+          the first, so real billing is lower than the raw totals here. The expanded original is new
+          input and cannot be a cache hit, so the direction stands — but the magnitude in Scenario B
+          is an upper bound. This is the most important open item.
+        </li>
+        <li>
+          Token counts come from <code>tiktoken</code> over the message payload, excluding system
+          prompt and tool-schema overhead.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Reproduce it</p>
+    <h2>Every number here comes from a script</h2>
+    <div class="repro">
+      <b>python harness/mock_upstream.py</b> &amp;<br>
+      <b>paritok proxy</b> --port 8080 --anthropic-url http://127.0.0.1:9100 --config-file paritok.yaml &amp;<br>
+      <b>python run_pinned_proxy.py</b> --port 8081 --anthropic-url http://127.0.0.1:9100 --config-file paritok.yaml &amp;<br>
+      <br>
+      <b>python validate_real_proxy.py</b> &nbsp;&nbsp;# the finding<br>
+      <b>python bench_ab.py</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# the A/B<br>
+      <b>python -m pytest tests/ -q</b> &nbsp;&nbsp;# 5 tests
+    </div>
+    <p style="margin-top:16px">
+      Restart the proxies between runs — the compression cache and the pin set both persist for the
+      life of the process, and <code>/stats</code> is cumulative.
+    </p>
+  </section>
+
+  <footer>
+    <span>github.com/GauravGupte20/paritok-pin-on-expand</span>
+    <span>Built with Paritok · Apache-2.0</span>
+  </footer>
+</div>
+
+<div class="tooltip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+  (function () {
+    "use strict";
+
+    var tip = document.getElementById("tip");
+
+    function showTip(evt, html) {
+      tip.innerHTML = html;
+      tip.style.opacity = "1";
+      var pad = 14;
+      var x = evt.clientX + pad;
+      var y = evt.clientY + pad;
+      var r = tip.getBoundingClientRect();
+      if (x + r.width > window.innerWidth - 8) x = evt.clientX - r.width - pad;
+      if (y + r.height > window.innerHeight - 8) y = evt.clientY - r.height - pad;
+      tip.style.left = x + "px";
+      tip.style.top = y + "px";
+    }
+
+    function hideTip() { tip.style.opacity = "0"; }
+
+    var NS = "http://www.w3.org/2000/svg";
+
+    function el(name, attrs, text) {
+      var n = document.createElementNS(NS, name);
+      for (var k in attrs) n.setAttribute(k, attrs[k]);
+      if (text != null) n.textContent = text;
+      return n;
+    }
+
+    var fmt = function (n) { return Math.round(n).toLocaleString("en-US"); };
+
+    /* ── Scenario A/B bar chart ───────────────────── */
+
+    var AB = [
+      { group: "Scenario A — never expands", bars: [
+        { label: "Stock Paritok", value: 15366, posts: 3 },
+        { label: "Pin-on-expand", value: 15366, posts: 3 }
+      ]},
+      { group: "Scenario B — expands each turn", bars: [
+        { label: "Stock Paritok", value: 90747, posts: 6 },
+        { label: "Pin-on-expand", value: 70281, posts: 4 }
+      ]}
+    ];
+
+    var NOPROXY = 60015;
+
+    function drawAB() {
+      var svg = document.getElementById("ab-chart");
+      svg.textContent = "";
+
+      var W = 860, H = 340;
+      var m = { top: 18, right: 24, bottom: 58, left: 176 };
+      var plotW = W - m.left - m.right;
+      var plotH = H - m.top - m.bottom;
+      var max = 96000;
+
+      var x = function (v) { return m.left + (v / max) * plotW; };
+
+      // grid
+      for (var g = 0; g <= 96000; g += 24000) {
+        svg.appendChild(el("line", {
+          x1: x(g), y1: m.top, x2: x(g), y2: m.top + plotH, class: "grid-line"
+        }));
+        svg.appendChild(el("text", {
+          x: x(g), y: m.top + plotH + 18, class: "axis-text", "text-anchor": "middle"
+        }, g === 0 ? "0" : fmt(g)));
+      }
+
+      svg.appendChild(el("text", {
+        x: m.left + plotW / 2, y: H - 12, class: "axis-text", "text-anchor": "middle"
+      }, "tokens billed upstream"));
+
+      // rows
+      var rowH = 34, gap = 12, groupGap = 30;
+      var y = m.top + 12;
+
+      AB.forEach(function (grp) {
+        svg.appendChild(el("text", {
+          x: 0, y: y - 8, class: "group-label", "font-weight": "650"
+        }, grp.group));
+
+        grp.bars.forEach(function (b) {
+          var isPin = b.label.indexOf("Pin") === 0;
+          svg.appendChild(el("text", {
+            x: m.left - 14, y: y + rowH / 2 + 4, class: "group-label", "text-anchor": "end"
+          }, b.label));
+
+          svg.appendChild(el("rect", {
+            x: m.left, y: y, width: plotW, height: rowH, rx: 4, class: "bar-track"
+          }));
+
+          var w = Math.max(4, x(b.value) - m.left);
+          var rect = el("rect", {
+            x: m.left, y: y, width: w, height: rowH, rx: 4,
+            fill: "var(--billed)", class: "bar",
+            opacity: isPin ? "0.72" : "1"
+          });
+          rect.addEventListener("mousemove", (function (bar) {
+            return function (e) {
+              showTip(e, "<b>" + bar.label + "</b><br>" + fmt(bar.value) +
+                " tokens · " + bar.posts + " POSTs");
+            };
+          })(b));
+          rect.addEventListener("mouseleave", hideTip);
+          svg.appendChild(rect);
+
+          var labelInside = w > 132;
+          svg.appendChild(el("text", {
+            x: labelInside ? m.left + w - 12 : m.left + w + 10,
+            y: y + rowH / 2 + 4,
+            class: "bar-label",
+            "text-anchor": labelInside ? "end" : "start",
+            fill: labelInside ? "var(--raised)" : "var(--ink)",
+            "font-weight": "600"
+          }, fmt(b.value)));
+
+          y += rowH + gap;
+        });
+
+        y += groupGap;
+      });
+
+      // no-proxy baseline
+      svg.appendChild(el("line", {
+        x1: x(NOPROXY), y1: m.top, x2: x(NOPROXY), y2: m.top + plotH, class: "baseline-line"
+      }));
+      svg.appendChild(el("text", {
+        x: x(NOPROXY), y: m.top - 4, class: "axis-text",
+        "text-anchor": "middle", fill: "var(--neutral-mark)"
+      }, "no proxy · 60,015"));
+    }
+
+    /* ── Projection ───────────────────────────────── */
+
+    // Measured per-turn unit costs.
+    var COST = {
+      compressed: 5122,   // stock, turn with no expansion
+      expandTurn: 30249,  // stock, turn containing an expand round-trip
+      pinned: 20016,      // pin-on-expand, verbatim passthrough after a pin
+      noProxy: 20005      // no proxy at all
+    };
+
+    var state = { turns: 3, freq: 1 };
+
+    function simulate(turns, freq) {
+      var stock = 0, pin = 0, noproxy = 0, pinned = false;
+      var seriesStock = [0], seriesPin = [0], seriesNo = [0];
+
+      for (var t = 1; t <= turns; t++) {
+        var needsExact = freq > 0 && (t % freq === 1 || freq === 1);
+
+        stock += needsExact ? COST.expandTurn : COST.compressed;
+
+        if (pinned) {
+          pin += COST.pinned;
+        } else if (needsExact) {
+          pin += COST.expandTurn;
+          pinned = true;
+        } else {
+          pin += COST.compressed;
+        }
+
+        noproxy += COST.noProxy;
+
+        seriesStock.push(stock);
+        seriesPin.push(pin);
+        seriesNo.push(noproxy);
+      }
+      return { stock: seriesStock, pin: seriesPin, noproxy: seriesNo };
+    }
+
+    function drawProjection() {
+      var svg = document.getElementById("proj-chart");
+      svg.textContent = "";
+
+      var data = simulate(state.turns, state.freq);
+      var W = 860, H = 300;
+      var m = { top: 20, right: 96, bottom: 46, left: 68 };
+      var plotW = W - m.left - m.right;
+      var plotH = H - m.top - m.bottom;
+
+      var maxV = Math.max(
+        data.stock[data.stock.length - 1],
+        data.pin[data.pin.length - 1],
+        data.noproxy[data.noproxy.length - 1],
+        1
+      );
+      var niceMax = Math.ceil(maxV / 50000) * 50000 || 50000;
+      var n = state.turns;
+
+      var X = function (i) { return m.left + (n === 0 ? 0 : (i / n) * plotW); };
+      var Y = function (v) { return m.top + plotH - (v / niceMax) * plotH; };
+
+      // grid + y axis
+      var steps = 4;
+      for (var s = 0; s <= steps; s++) {
+        var v = (niceMax / steps) * s;
+        svg.appendChild(el("line", {
+          x1: m.left, y1: Y(v), x2: m.left + plotW, y2: Y(v), class: "grid-line"
+        }));
+        svg.appendChild(el("text", {
+          x: m.left - 10, y: Y(v) + 4, class: "axis-text", "text-anchor": "end"
+        }, v >= 1000 ? fmt(v / 1000) + "k" : "0"));
+      }
+
+      // x axis
+      var tickEvery = n > 12 ? 4 : (n > 6 ? 2 : 1);
+      for (var i = 0; i <= n; i++) {
+        if (i % tickEvery !== 0 && i !== n) continue;
+        svg.appendChild(el("text", {
+          x: X(i), y: m.top + plotH + 20, class: "axis-text", "text-anchor": "middle"
+        }, String(i)));
+      }
+      svg.appendChild(el("text", {
+        x: m.left + plotW / 2, y: H - 8, class: "axis-text", "text-anchor": "middle"
+      }, "turns elapsed"));
+
+      function path(series, color, dash, width) {
+        var d = series.map(function (v, i) {
+          return (i === 0 ? "M" : "L") + X(i) + " " + Y(v);
+        }).join(" ");
+        var p = el("path", {
+          d: d, fill: "none", stroke: color, "stroke-width": width || 2,
+          "stroke-linejoin": "round", "stroke-linecap": "round"
+        });
+        if (dash) p.setAttribute("stroke-dasharray", dash);
+        svg.appendChild(p);
+      }
+
+      path(data.noproxy, "var(--neutral-mark)", "5 4", 2);
+      path(data.stock, "var(--billed)", null, 2.5);
+      path(data.pin, "var(--reported)", null, 2.5);
+
+      // endpoint markers + direct labels
+      function endpoint(series, color, label) {
+        var v = series[series.length - 1];
+        svg.appendChild(el("circle", {
+          cx: X(n), cy: Y(v), r: 4.5, fill: color,
+          stroke: "var(--raised)", "stroke-width": 2
+        }));
+        svg.appendChild(el("text", {
+          x: X(n) + 12, y: Y(v) + 4, class: "bar-label", fill: color, "font-weight": "600"
+        }, label));
+      }
+
+      endpoint(data.noproxy, "var(--neutral-mark)", fmt(data.noproxy[n] / 1000) + "k");
+      endpoint(data.stock, "var(--billed)", fmt(data.stock[n] / 1000) + "k");
+      endpoint(data.pin, "var(--reported)", fmt(data.pin[n] / 1000) + "k");
+
+      // hover columns
+      for (var j = 1; j <= n; j++) {
+        (function (idx) {
+          var band = el("rect", {
+            x: X(idx) - (plotW / n) / 2, y: m.top,
+            width: plotW / n, height: plotH,
+            fill: "transparent", style: "cursor:crosshair"
+          });
+          band.addEventListener("mousemove", function (e) {
+            showTip(e,
+              "<b>after turn " + idx + "</b><br>" +
+              "stock &nbsp;&nbsp;" + fmt(data.stock[idx]) + "<br>" +
+              "pinned &nbsp;" + fmt(data.pin[idx]) + "<br>" +
+              "no proxy " + fmt(data.noproxy[idx]));
+          });
+          band.addEventListener("mouseleave", hideTip);
+          svg.appendChild(band);
+        })(j);
+      }
+
+      // readout
+      var st = data.stock[n], pn = data.pin[n];
+      document.getElementById("ro-stock").textContent = fmt(st);
+      document.getElementById("ro-pin").textContent = fmt(pn);
+      var delta = st === 0 ? 0 : (1 - pn / st) * 100;
+      var d = document.getElementById("ro-delta");
+      d.textContent = delta > 0.05 ? "−" + delta.toFixed(1) + "%" : "0.0%";
+      d.className = delta > 0.05 ? "pos" : "";
+    }
+
+    /* ── wiring ───────────────────────────────────── */
+
+    var turnsInput = document.getElementById("turns");
+    turnsInput.addEventListener("input", function () {
+      state.turns = parseInt(this.value, 10);
+      document.getElementById("turns-val").textContent = state.turns;
+      drawProjection();
+    });
+
+    var freqBtns = document.querySelectorAll("#freq-group button");
+    Array.prototype.forEach.call(freqBtns, function (btn) {
+      btn.addEventListener("click", function () {
+        Array.prototype.forEach.call(freqBtns, function (b) {
+          b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+        });
+        state.freq = parseInt(btn.getAttribute("data-freq"), 10);
+        drawProjection();
+      });
+    });
+
+    drawAB();
+    drawProjection();
+
+    window.addEventListener("resize", function () { drawAB(); drawProjection(); });
+  })();
+</script>

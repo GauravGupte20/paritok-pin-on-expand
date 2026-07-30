@@ -111,6 +111,33 @@ counted at full size rather than silently excluded.
 
 ---
 
+## The app
+
+A web UI that runs the whole thing live: paste a source file, and it cold-starts
+**two real `paritok proxy` processes** — one stock, one with `install()` applied —
+drives a real multi-turn session through each over HTTP, and reconciles what was
+billed against what was reported.
+
+```bash
+pip install -r requirements.txt
+PORT=8420 uvicorn app.main:app --port 8420
+```
+
+Set `PARITOK_API_KEY` to compress through Paritok's hosted 4B GPU instead of the
+in-process mock compressor; the app shows which backend is live in the header.
+
+The provider is always mocked. That is not a shortcut — a real provider will
+neither let us script when the model calls `expand_context` nor report exactly
+what each POST was billed, and both are the measurement.
+
+Deploy with the included `Dockerfile` / `render.yaml`.
+
+### Why it cold-starts the proxies on every run
+
+The compression cache, the shadow store and the pin set all live for the life of
+the proxy process, and `/stats` is cumulative. A warm proxy silently returns a
+previous run's result. Restarting is the only way a run means what it says.
+
 ## Limitations
 
 Stated plainly, because several of these would change the numbers:

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pin-on-Expand — token billing reconciliation</title>
+<meta name="description" content="Run a real agent session through two real Paritok proxies and reconcile what was reported against what was billed.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">pin-on-expand</span>
+    <span class="brand-sub">token billing reconciliation</span>
+  </div>
+  <div class="topbar-right">
+    <span class="pill" id="backend-pill" title="Which compressor is active">
+      <i class="dot"></i><span id="backend-label">checking…</span>
+    </span>
+    <a class="ghost-link" href="https://github.com/GauravGupte20/paritok-pin-on-expand" target="_blank" rel="noopener">source</a>
+    <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle colour theme">◐</button>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ── input ───────────────────────────────────────── -->
+  <section class="panel panel-input" aria-labelledby="input-h">
+    <div class="panel-head">
+      <h2 id="input-h">Session input</h2>
+      <p>Paste a source file. It becomes the <code>Read</code> tool result an agent
+         carries in context, turn after turn.</p>
+    </div>
+
+    <div class="editor-wrap">
+      <div class="editor-bar">
+        <input type="text" id="filename" value="argparse.py" spellcheck="false"
+               aria-label="File name" class="filename-input">
+        <span class="editor-meta"><span id="tok-count">0</span> tokens</span>
+      </div>
+      <textarea id="source" spellcheck="false" autocomplete="off"
+                aria-label="Source file contents"
+                placeholder="Paste a source file of at least 512 tokens…"></textarea>
+      <div class="editor-foot">
+        <button type="button" class="chip" data-sample="argparse">load argparse.py</button>
+        <button type="button" class="chip" data-sample="server">load http/server.py</button>
+        <button type="button" class="chip" id="clear-btn">clear</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="ctl">
+        <label for="turns">Turns <span class="ctl-val" id="turns-val">3</span></label>
+        <input type="range" id="turns" min="1" max="8" value="3" step="1">
+      </div>
+      <div class="ctl">
+        <label id="expand-label">Model needs exact source</label>
+        <div class="seg" role="group" aria-labelledby="expand-label">
+          <button type="button" data-expands="1" aria-pressed="true">every turn</button>
+          <button type="button" data-expands="0" aria-pressed="false">never</button>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" id="run-btn" class="run">
+      <span class="run-label">Run reconciliation</span>
+      <span class="run-hint">2 proxies · cold start</span>
+    </button>
+
+    <ol class="stages" id="stages" aria-live="polite">
+      <li data-stage="boot">Cold-starting stock &amp; pinned proxies</li>
+      <li data-stage="stock">Driving session through stock Paritok</li>
+      <li data-stage="pinned">Driving session through pin-on-expand</li>
+      <li data-stage="done">Reconciling billed against reported</li>
+    </ol>
+
+    <p class="err" id="err" role="alert" hidden></p>
+  </section>
+
+  <!-- ── results ─────────────────────────────────────── -->
+  <section class="panel panel-results" aria-labelledby="results-h" aria-busy="false">
+    <h2 id="results-h" class="sr-only">Results</h2>
+
+    <div class="empty" id="empty">
+      <div class="empty-art" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <h3>Nothing measured yet</h3>
+      <p>Every figure on this page is produced by real <code>paritok proxy</code>
+         processes — one stock, one patched — driven over HTTP. Nothing is
+         simulated or hard-coded.</p>
+    </div>
+
+    <div id="results" hidden>
+
+      <!-- reconciliation -->
+      <div class="recon" id="recon">
+        <div class="recon-cell">
+          <span class="recon-key"><i class="sw sw-rep"></i>Paritok reports</span>
+          <span class="recon-num rep" id="r-reported">—</span>
+          <span class="recon-note">saved, per the proxy's own <code>/stats</code></span>
+        </div>
+        <div class="recon-div" data-label="vs"></div>
+        <div class="recon-cell right">
+          <span class="recon-key"><i class="sw sw-bill"></i>The provider bills</span>
+          <span class="recon-num bill" id="r-actual">—</span>
+          <span class="recon-note" id="r-actual-note">against sending it uncompressed</span>
+        </div>
+      </div>
+
+      <p class="verdict" id="verdict"></p>
+
+      <!-- ledger -->
+      <div class="block">
+        <div class="block-head">
+          <h3>Upstream POSTs — stock Paritok</h3>
+          <span class="block-meta" id="ledger-meta"></span>
+        </div>
+        <div class="ledger" id="ledger"></div>
+        <p class="block-foot">
+          <code>/stats</code> is computed once per client turn, before the proxy's
+          own expand loop runs. Anything it POSTs after that is billed and
+          uncounted.
+        </p>
+      </div>
+
+      <!-- comparison -->
+      <div class="block">
+        <div class="block-head">
+          <h3>Tokens billed across the session</h3>
+          <span class="block-meta">lower is better</span>
+        </div>
+        <div class="legend">
+          <span><i class="sw sw-bill"></i>stock Paritok</span>
+          <span><i class="sw sw-rep"></i>pin-on-expand</span>
+          <span><i class="sw sw-base"></i>no proxy at all</span>
+        </div>
+        <div class="bars" id="bars"></div>
+      </div>
+
+      <!-- stat grid -->
+      <div class="statgrid" id="statgrid"></div>
+
+      <p class="block-foot foot-caveat" id="caveat"></p>
+    </div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

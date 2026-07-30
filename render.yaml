@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: pin-on-expand
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      # Set this in the Render dashboard to compress through Paritok's hosted
+      # GPU instead of the in-process mock compressor.
+      - key: PARITOK_API_KEY
+        sync: false
