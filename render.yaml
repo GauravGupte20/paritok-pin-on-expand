@@ -3,7 +3,10 @@ services:
     name: pin-on-expand
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter
+    # Measured peak is ~226 MiB across all three processes (web + two proxy
+    # subprocesses), so the 512 MB free instance fits. Upgrade to starter only
+    # to avoid the free tier's spin-down after 15 minutes idle.
+    plan: free
     healthCheckPath: /api/health
     envVars:
       # Set this in the Render dashboard to compress through Paritok's hosted
