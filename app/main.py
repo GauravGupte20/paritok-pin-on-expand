@@ -79,7 +79,9 @@ def _messages(source: str, filename: str, turn: int) -> list[dict]:
 
 def _run_variant(variant: str, req: RunRequest) -> dict:
     assert fleet is not None
-    url = fleet.url(variant)
+    # Cold-start this variant's proxy only. Caches, shadow store and pins are
+    # all per-process, so a fresh process is what makes the run mean anything.
+    url = fleet.start_one(variant)
     recorder.reset(variant=variant, expand_enabled=req.expands)
 
     before = httpx.get(f"{url}/stats", timeout=10).json()
@@ -139,10 +141,12 @@ def api_run(req: RunRequest) -> dict:
             f"paste a longer file.",
         )
 
-    # Cold-start both proxies: caches, shadow store and pins are all per-process.
-    fleet.restart()
+    try:
+        results = {v: _run_variant(v, req) for v in ("stock", "pinned")}
+    finally:
+        # Never leave a proxy process behind holding memory between runs.
+        fleet.stop()
 
-    results = {v: _run_variant(v, req) for v in ("stock", "pinned")}
     no_proxy = source_tokens * req.turns
 
     for r in results.values():

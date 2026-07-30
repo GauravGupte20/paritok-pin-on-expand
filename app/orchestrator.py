@@ -125,17 +125,24 @@ class ProxyFleet:
         handle.stop()
         raise RuntimeError(f"{handle.variant} proxy did not become healthy in time")
 
-    def restart(self) -> None:
-        """Cold-start both proxies. Every run begins here."""
+    def start_one(self, variant: str) -> str:
+        """Cold-start a single proxy and return its base URL.
+
+        One at a time, not both: each proxy is a Python process that imports
+        paritok and tiktoken, and holding two of them alongside the web process
+        doubles peak memory for no benefit — the variants are measured
+        sequentially anyway. On a 512 MB instance that difference is the
+        difference between running and being OOM-killed mid-request.
+        """
         self.stop()
-        for variant in ("stock", "pinned"):
-            handle = self._spawn(variant)
-            try:
-                self._wait_healthy(handle)
-            except Exception:
-                self.stop()
-                raise
-            self.handles[variant] = handle
+        handle = self._spawn(variant)
+        try:
+            self._wait_healthy(handle)
+        except Exception:
+            self.stop()
+            raise
+        self.handles[variant] = handle
+        return handle.url
 
     def stop(self) -> None:
         for handle in self.handles.values():
