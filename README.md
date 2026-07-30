@@ -1,3 +1,15 @@
+---
+title: Pin-on-Expand
+emoji: 🧾
+colorFrom: blue
+colorTo: gray
+sdk: docker
+app_port: 8080
+pinned: false
+license: apache-2.0
+short_description: Reconcile what Paritok reports saving against what you are billed
+---
+
 # Pin-on-Expand — teaching Paritok when *not* to compress
 
 Built with [Paritok](https://github.com/Paritok-official/paritok-4b-v1) for the

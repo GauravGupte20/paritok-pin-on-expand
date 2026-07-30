@@ -1,6 +1,6 @@
 """Web app: run a real agent session through two real proxies and reconcile.
 
-    uvicorn app.main:app --port 8000
+    uvicorn app.main:app --port 8420
 
 Set PARITOK_API_KEY to compress through Paritok's hosted GPU instead of the
 in-process mock compressor. The provider is always mocked — we have to script
@@ -15,11 +15,12 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from app.mock import RunRecorder, compress_reply, messages_reply
+from app.mock import RunRecorder
+from app.mockserver import MockUpstream
 from app.orchestrator import ProxyFleet
 from paritok.token_counter import count_tokens
 
@@ -29,32 +30,22 @@ MAX_SOURCE_CHARS = 200_000
 app = FastAPI(title="Pin-on-Expand", docs_url=None, redoc_url=None)
 
 recorder = RunRecorder()
+mock_upstream = MockUpstream(recorder)
 fleet: ProxyFleet | None = None
 
 
 @app.on_event("startup")
 def _startup() -> None:
     global fleet
-    port = int(os.environ.get("PORT", "8000"))
-    fleet = ProxyFleet(mock_base=f"http://127.0.0.1:{port}/_mock")
+    mock_upstream.start()
+    fleet = ProxyFleet(mock_base=mock_upstream.base_url)
 
 
 @app.on_event("shutdown")
 def _shutdown() -> None:
     if fleet:
         fleet.stop()
-
-
-# ── the mocked upstream the proxies talk to ──────────────────────────
-
-@app.post("/_mock/v1/chat/completions")
-async def mock_compress(payload: dict) -> JSONResponse:
-    return JSONResponse(compress_reply(payload))
-
-
-@app.post("/_mock/v1/messages")
-async def mock_messages(payload: dict) -> JSONResponse:
-    return JSONResponse(messages_reply(payload, recorder))
+    mock_upstream.stop()
 
 
 # ── the run ──────────────────────────────────────────────────────────
