@@ -582,3 +582,5 @@ input[type=range] { width: 100%; accent-color: var(--reported); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+.stage-note { color: var(--ink-3); font-size: 10.5px; }

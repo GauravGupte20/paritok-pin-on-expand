@@ -146,11 +146,9 @@
     clearStages();
     setStage("boot");
 
-    // The server runs boot -> stock -> pinned synchronously; advance the
-    // indicator on a timer so the stages reflect roughly where it is.
-    var t1 = setTimeout(function () { setStage("stock"); }, 2600);
-    var t2 = setTimeout(function () { setStage("pinned"); }, 5200);
-
+    // Stages come from the server's own job state, not a timer: a run on a
+    // small instance can take minutes, and a faked progress bar that finishes
+    // before the work does is worse than none.
     fetch("/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -163,18 +161,17 @@
     })
       .then(function (r) {
         return r.json().then(function (body) {
-          if (!r.ok) throw new Error(body.detail || ("run failed (" + r.status + ")"));
-          return body;
+          if (!r.ok) throw new Error(body.detail || ("could not start (" + r.status + ")"));
+          return body.job_id;
         });
       })
+      .then(poll)
       .then(function (data) {
-        clearTimeout(t1); clearTimeout(t2);
         setStage("done");
         render(data);
         setTimeout(function () { $("stages").classList.remove("on"); }, 700);
       })
       .catch(function (e) {
-        clearTimeout(t1); clearTimeout(t2);
         clearStages();
         $("stages").classList.remove("on");
         showError(e.message || "Something went wrong running the session.");
@@ -185,6 +182,43 @@
         document.querySelector(".panel-results").setAttribute("aria-busy", "false");
       });
   });
+
+  function poll(jobId) {
+    return new Promise(function (resolve, reject) {
+      var tries = 0;
+      (function tick() {
+        tries++;
+        // Generous ceiling: ~10 minutes at 2s. A constrained host is slow, not
+        // broken, and giving up early would misreport it as a failure.
+        if (tries > 300) { reject(new Error("run timed out")); return; }
+        fetch("/api/run/" + jobId)
+          .then(function (r) {
+            if (!r.ok) throw new Error("lost track of the run (" + r.status + ")");
+            return r.json();
+          })
+          .then(function (j) {
+            if (j.stage) setStage(j.stage);
+            if (j.detail) setDetail(j.stage, j.detail, j.elapsed);
+            if (j.status === "done") { resolve(j.result); return; }
+            if (j.status === "error") { reject(new Error(j.error)); return; }
+            setTimeout(tick, 2000);
+          })
+          .catch(reject);
+      })();
+    });
+  }
+
+  function setDetail(stage, detail, elapsed) {
+    var li = document.querySelector('[data-stage="' + stage + '"]');
+    if (!li) return;
+    var note = li.querySelector(".stage-note");
+    if (!note) {
+      note = document.createElement("span");
+      note.className = "stage-note";
+      li.appendChild(note);
+    }
+    note.textContent = " — " + detail + (elapsed ? " (" + elapsed + "s)" : "");
+  }
 
   /* ── render ────────────────────────────────────────── */
 

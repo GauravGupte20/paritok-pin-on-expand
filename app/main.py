@@ -19,6 +19,7 @@ from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from app.jobs import Job, JobRegistry
 from app.mock import RunRecorder
 from app.mockserver import MockUpstream
 from app.orchestrator import ProxyFleet
@@ -32,6 +33,7 @@ app = FastAPI(title="Pin-on-Expand", docs_url=None, redoc_url=None)
 recorder = RunRecorder()
 mock_upstream = MockUpstream(recorder)
 fleet: ProxyFleet | None = None
+jobs = JobRegistry()
 
 
 @app.on_event("startup")
@@ -77,11 +79,16 @@ def _messages(source: str, filename: str, turn: int) -> list[dict]:
     return msgs
 
 
-def _run_variant(variant: str, req: RunRequest) -> dict:
+def _run_variant(variant: str, req: RunRequest, job: Job | None = None) -> dict:
     assert fleet is not None
     # Cold-start this variant's proxy only. Caches, shadow store and pins are
     # all per-process, so a fresh process is what makes the run mean anything.
+    if job is not None:
+        job.stage = variant
+        job.detail = f"cold-starting {variant} proxy"
     url = fleet.start_one(variant)
+    if job is not None:
+        job.detail = f"driving {req.turns} turns through {variant}"
     recorder.reset(variant=variant, expand_enabled=req.expands)
 
     before = httpx.get(f"{url}/stats", timeout=10).json()
@@ -125,30 +132,16 @@ def _run_variant(variant: str, req: RunRequest) -> dict:
     }
 
 
-@app.post("/api/run")
-def api_run(req: RunRequest) -> dict:
-    if fleet is None:
-        raise HTTPException(503, "not ready")
-    if len(req.source) > MAX_SOURCE_CHARS:
-        raise HTTPException(413, f"source exceeds {MAX_SOURCE_CHARS} characters")
-
+def _execute(req: RunRequest, job: Job | None = None) -> dict:
+    assert fleet is not None
     source_tokens = count_tokens(req.source, "claude-sonnet-4-20250514")
-    if source_tokens < 512:
-        raise HTTPException(
-            422,
-            f"This file is {source_tokens} tokens. Paritok's pipeline skips anything "
-            f"under its 512-token floor, so there would be nothing to compress — "
-            f"paste a longer file.",
-        )
-
     try:
-        results = {v: _run_variant(v, req) for v in ("stock", "pinned")}
+        results = {v: _run_variant(v, req, job) for v in ("stock", "pinned")}
     finally:
         # Never leave a proxy process behind holding memory between runs.
         fleet.stop()
 
     no_proxy = source_tokens * req.turns
-
     for r in results.values():
         r["vs_no_proxy"] = (1 - r["billed"] / no_proxy) if no_proxy else 0.0
         r["reported_saving"] = (
@@ -173,6 +166,49 @@ def api_run(req: RunRequest) -> dict:
             "posts_saved": stock["post_count"] - pinned["post_count"],
         },
     }
+
+
+def _validate(req: RunRequest) -> int:
+    if fleet is None:
+        raise HTTPException(503, "not ready")
+    if len(req.source) > MAX_SOURCE_CHARS:
+        raise HTTPException(413, f"source exceeds {MAX_SOURCE_CHARS} characters")
+    source_tokens = count_tokens(req.source, "claude-sonnet-4-20250514")
+    if source_tokens < 512:
+        raise HTTPException(
+            422,
+            f"This file is {source_tokens} tokens. Paritok's pipeline skips anything "
+            f"under its 512-token floor, so there would be nothing to compress — "
+            f"paste a longer file.",
+        )
+    return source_tokens
+
+
+@app.post("/api/run")
+def api_run(req: RunRequest) -> dict:
+    """Start a run. Returns immediately with a job id to poll.
+
+    A run takes minutes on a small instance, which is longer than a platform
+    will hold an HTTP request open — see app/jobs.py.
+    """
+    _validate(req)
+    if jobs.running:
+        raise HTTPException(
+            429,
+            "A reconciliation is already running. Each run needs exclusive use of "
+            "the proxy processes, so they are queued one at a time — try again in "
+            "a moment.",
+        )
+    job = jobs.submit(lambda j: _execute(req, j))
+    return {"job_id": job.id, "status": job.status}
+
+
+@app.get("/api/run/{job_id}")
+def api_run_status(job_id: str) -> dict:
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(404, "unknown or expired job")
+    return job.snapshot()
 
 
 # Samples come from the running interpreter's own stdlib: real, substantial code

@@ -25,7 +25,11 @@ from pathlib import Path
 import httpx
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-STARTUP_TIMEOUT = 45.0
+# A constrained host (Render free is 0.1 CPU) needs far longer than a laptop to
+# fork a Python process and import paritok + tiktoken. Measured at ~25s there
+# against well under a second locally, so this is generous on purpose: timing out
+# early turns a slow start into an opaque 500.
+STARTUP_TIMEOUT = 180.0
 
 
 def _free_port() -> int:
