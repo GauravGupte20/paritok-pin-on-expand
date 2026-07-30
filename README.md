@@ -12,6 +12,10 @@ Every claim below is produced by a script in this repo, run against a real
 
 ---
 
+Measured against **`paritok` 1.2.8** (PyPI). Every line reference below was
+verified to land on the cited code in that released version, and the Docker image
+— which installs from PyPI rather than a checkout — reproduces every number.
+
 ## The finding
 
 When the model calls `expand_context`, the proxy resolves it in its own loop
